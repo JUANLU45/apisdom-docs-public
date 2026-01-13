@@ -1,0 +1,11 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.7, pytest-9.0.2, pluggy-1.6.0 -- C:\PR0YECTOS DESARROYO\apisdom-project\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\PR0YECTOS DESARROYO\apisdom-project
+configfile: pytest.ini
+collecting ... collected 2 items
+
+tests/3_functionality/test_prediction_api.py::test_prediction_api_health PASSED [ 50%]
+tests/3_functionality/test_prediction_api.py::test_prediction_api_predict_endpoint SKIPPEDsource .env) [100%]
+
+======================== 1 passed, 1 skipped in 0.11s =========================

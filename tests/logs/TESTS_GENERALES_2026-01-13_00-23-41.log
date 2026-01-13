@@ -1,0 +1,36 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.7, pytest-9.0.2, pluggy-1.6.0 -- C:\PR0YECTOS DESARROYO\apisdom-project\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\PR0YECTOS DESARROYO\apisdom-project
+configfile: pytest.ini
+collecting ... collected 26 items
+
+tests/1_security/test_auth.py::test_jwt_dependency_exists PASSED         [  3%]
+tests/1_security/test_auth.py::test_emergency_admin_key_only_in_api_core PASSED [  7%]
+tests/1_security/test_auth.py::test_no_debug_or_insecure_code PASSED     [ 11%]
+tests/1_security/test_cors.py::test_cors_configured_in_all_services PASSED [ 15%]
+tests/1_security/test_cors.py::test_no_wildcard_cors_in_production PASSED [ 19%]
+tests/1_security/test_secrets.py::test_no_hardcoded_secrets PASSED       [ 23%]
+tests/1_security/test_secrets.py::test_required_secrets_validated PASSED [ 26%]
+tests/2_costs/test_free_user_cost.py::test_free_user_cost_calculation PASSED [ 30%]
+tests/2_costs/test_idle_cost.py::test_idle_cost_is_zero PASSED           [ 34%]
+tests/2_costs/test_scaling_cost.py::test_scaling_cost_with_100_users PASSED [ 38%]
+tests/2_costs/test_token_counting.py::test_tiktoken_is_installed PASSED  [ 42%]
+tests/2_costs/test_token_counting.py::test_token_counting_consistency PASSED [ 46%]
+tests/2_costs/test_token_counting.py::test_token_counting_different_texts PASSED [ 50%]
+tests/3_functionality/test_api_core.py::test_api_core_health PASSED      [ 53%]
+tests/3_functionality/test_api_core.py::test_api_core_recommendations_endpoint SKIPPEDsource .env) [ 57%]
+tests/3_functionality/test_maas.py::test_maas_health PASSED              [ 61%]
+tests/3_functionality/test_maas.py::test_maas_adapt_endpoint SKIPPEDa;
+source .env)                                                             [ 65%]
+tests/3_functionality/test_moderation_api.py::test_moderation_api_health PASSED [ 69%]
+tests/3_functionality/test_moderation_api.py::test_moderation_api_moderate_endpoint SKIPPEDsource .env) [ 73%]
+tests/3_functionality/test_prediction_api.py::test_prediction_api_health PASSED [ 76%]
+tests/3_functionality/test_prediction_api.py::test_prediction_api_predict_endpoint SKIPPEDsource .env) [ 80%]
+tests/3_functionality/test_sentiment_api.py::test_sentiment_api_health PASSED [ 84%]
+tests/3_functionality/test_sentiment_api.py::test_sentiment_api_analyze_endpoint SKIPPEDsource .env) [ 88%]
+tests/4_integration/test_api_core_to_maas.py::test_maas_is_accessible_from_network PASSED [ 92%]
+tests/4_integration/test_api_core_to_maas.py::test_api_core_can_reach_maas PASSED [ 96%]
+tests/4_integration/test_health_checks.py::test_all_services_healthy PASSED [100%]
+
+======================== 21 passed, 5 skipped in 3.06s ========================
