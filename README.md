@@ -110,6 +110,7 @@ console.log(`${resultado.sentiment}: ${(resultado.score * 100).toFixed(0)}%`);
 | [🎭 Sentiment API](./docs/SENTIMENT_API.md) | Análisis de sentimiento - Guía completa |
 | [🛡️ Moderation API](./docs/MODERATION_API.md) | Detección de toxicidad - Guía completa |
 | [📈 Prediction API](./docs/PREDICTION_API.md) | Series temporales - Guía completa |
+| [🧪 Tests y Validación](./tests/README.md) | Resultados de pruebas automatizadas |
 
 ---
 
