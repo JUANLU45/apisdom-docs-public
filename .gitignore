@@ -1,0 +1,42 @@
+# Archivos de documentación compilados
+*.pdf
+*.docx
+
+# Dependencias de Node (si usas herramientas de docs)
+node_modules/
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.idea/
+.vscode/
+*.sublime-*
+
+# Logs
+*.log
+npm-debug.log*
+
+# Cache
+.cache/
+.temp/
+
+# Build outputs (si generas sitio estático)
+_site/
+dist/
+build/
+.next/
+out/
+
+# Archivos locales de configuración
+.env
+.env.local
+.env.*.local
+
+# Archivos temporales
+tmp/
+temp/
