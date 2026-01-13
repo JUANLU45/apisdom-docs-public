@@ -146,7 +146,7 @@ Obtén tu token en [apisdom.com/dashboard](https://apisdom.com/dashboard).
 | **Starter** | 10,000/mes | 60 req/min | < 500ms |
 | **Pro** | 100,000/mes | 300 req/min | < 500ms |
 
-Consulta precios actualizados en [apisdom.com/precios](https://apisdom.com/precios).
+Consulta precios actualizados en [apisdom.com/pricing](https://apisdom.com/pricing).
 
 ---
 
@@ -195,7 +195,7 @@ No almacenamos el contenido de tus requests. Solo métricas de uso para facturac
 
 - 🌐 [Sitio Web](https://apisdom.com)
 - 📊 [Dashboard](https://apisdom.com/dashboard)
-- 💳 [Precios](https://apisdom.com/precios)
+- 💳 [Precios](https://apisdom.com/pricing)
 - 📧 [Contacto](mailto:soporte@apisdom.com)
 
 ---
