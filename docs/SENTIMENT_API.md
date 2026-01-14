@@ -2,7 +2,7 @@
 
 **Análisis de Sentimiento con Inteligencia Artificial**
 
-Detecta automáticamente si un texto expresa emociones positivas, negativas o neutras. Perfecto para analizar opiniones de clientes, reseñas de productos o feedback de usuarios.
+Detecta automáticamente si un texto expresa emociones positivas o negativas (modelo binario SST-2). Perfecto para analizar opiniones de clientes, reseñas de productos o feedback de usuarios.
 
 ---
 
@@ -10,32 +10,55 @@ Detecta automáticamente si un texto expresa emociones positivas, negativas o ne
 
 | Propiedad | Valor |
 |-----------|-------|
-| **URL Base** | `https://api.apisdom.com/api/v1/sentiment` |
+| **URL Base** | `https://apisdom.com/api/v1` |
 | **Método** | `POST` |
-| **Autenticación** | Bearer Token (JWT) |
+| **Autenticación** | API Key (Header `X-API-Key`) |
 | **Tipo de Crédito** | `text` |
 | **Coste por llamada** | 1 crédito |
 | **Modelo IA** | DistilBERT (fine-tuned en SST-2) |
 | **Límite de tokens** | 512 tokens (textos largos serán truncados) |
 
+### ⏱️ Rate Limits
+
+| Plan | Límite | Cuota Mensual | Precio |
+|------|--------|---------------|--------|
+| **Prueba Gratuita** | 10 req/min | 1,000 créditos (único uso) | €0 |
+| **Plan Starter** | 60 req/min | 10,000 créditos/mes | €4.99/mes |
+| **Plan Pro** | 300 req/min | 100,000 créditos/mes | €19.99/mes |
+
+> **Nota sobre cuotas:**
+> - **Plan Gratuito**: Los 1,000 créditos son de uso único y NO se resetean.
+> - **Planes de pago**: Las cuotas se resetean el día 1 de cada mes a las 00:00 UTC.
+> - Si excedes el rate limit, recibirás error `429 Too Many Requests` con header `Retry-After`.
+
+### 📊 Headers Informativos
+
+La API devuelve headers que te permiten controlar tu consumo:
+
+| Header | Descripción |
+|--------|-------------|
+| `X-RateLimit-Limit` | Tu límite de peticiones por minuto |
+| `X-RateLimit-Remaining` | Peticiones restantes en la ventana actual |
+| `Retry-After` | Segundos a esperar si recibes 429 |
+
 ---
 
 ## 🔐 Autenticación
 
-Todas las peticiones requieren un token JWT en el header `Authorization`:
+Todas las peticiones requieren tu API Key en el header `X-API-Key`:
 
 ```
-Authorization: Bearer tu_token_jwt_aqui
+X-API-Key: tu_api_key_aqui
 ```
 
-Puedes obtener tu token desde el panel de usuario en [apisdom.com/dashboard](https://apisdom.com/dashboard).
+Puedes obtener tu API Key desde el panel de usuario en [apisdom.com/dashboard](https://apisdom.com/dashboard).
 
 ---
 
 ## 📥 Endpoint: Analizar Sentimiento
 
 ```
-POST /api/v1/sentiment/analyze
+POST https://apisdom.com/api/v1/sentiment
 ```
 
 ### Request Body
@@ -69,7 +92,7 @@ POST /api/v1/sentiment/analyze
 | Campo | Tipo | Descripción |
 |-------|------|-------------|
 | `text` | string | El texto que fue analizado |
-| `sentiment` | string | Sentimiento detectado: `positive`, `negative` o `neutral` |
+| `sentiment` | string | Sentimiento detectado: `positive` o `negative` (modelo binario SST-2) |
 | `score` | float | Confianza del modelo (0.0 a 1.0). Cuanto más cercano a 1, mayor certeza. |
 | `warning` | string \| null | Aviso si el texto fue truncado (textos muy largos) |
 | `info_message` | string \| null | Mensaje informativo para usuarios del plan gratuito |
@@ -83,8 +106,8 @@ POST /api/v1/sentiment/analyze
 ```python
 import requests
 
-API_URL = "https://api.apisdom.com/api/v1/sentiment/analyze"
-TOKEN = "tu_token_jwt_aqui"
+API_URL = "https://apisdom.com/api/v1/sentiment"
+API_KEY = "tu_api_key_aqui"
 
 def analizar_sentimiento(texto):
     """
@@ -99,7 +122,7 @@ def analizar_sentimiento(texto):
     response = requests.post(
         API_URL,
         headers={
-            "Authorization": f"Bearer {TOKEN}",
+            "X-API-Key": API_KEY,
             "Content-Type": "application/json"
         },
         json={"text": texto}
@@ -124,8 +147,8 @@ print(f"Confianza: {resultado['score']:.2%}")
 ### JavaScript / Node.js
 
 ```javascript
-const API_URL = 'https://api.apisdom.com/api/v1/sentiment/analyze';
-const TOKEN = 'tu_token_jwt_aqui';
+const API_URL = 'https://apisdom.com/api/v1/sentiment';
+const API_KEY = 'tu_api_key_aqui';
 
 async function analizarSentimiento(texto) {
   /**
@@ -136,7 +159,7 @@ async function analizarSentimiento(texto) {
   const response = await fetch(API_URL, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${TOKEN}`,
+      'X-API-Key': API_KEY,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({ text: texto })
@@ -168,8 +191,8 @@ analizarSentimiento('El producto llegó roto y nadie me ayuda')
 ### cURL
 
 ```bash
-curl -X POST "https://api.apisdom.com/api/v1/sentiment/analyze" \
-  -H "Authorization: Bearer tu_token_jwt_aqui" \
+curl -X POST "https://apisdom.com/api/v1/sentiment" \
+  -H "X-API-Key: tu_api_key_aqui" \
   -H "Content-Type: application/json" \
   -d '{"text": "La atención al cliente fue excelente, resolvieron mi problema en minutos."}'
 ```
@@ -178,18 +201,18 @@ curl -X POST "https://api.apisdom.com/api/v1/sentiment/analyze" \
 
 ```php
 <?php
-$api_url = 'https://api.apisdom.com/api/v1/sentiment/analyze';
-$token = 'tu_token_jwt_aqui';
+$api_url = 'https://apisdom.com/api/v1/sentiment';
+$api_key = 'tu_api_key_aqui';
 
 function analizarSentimiento($texto) {
-    global $api_url, $token;
+    global $api_url, $api_key;
     
     $ch = curl_init($api_url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST => true,
         CURLOPT_HTTPHEADER => [
-            'Authorization: Bearer ' . $token,
+            'X-API-Key: ' . $api_key,
             'Content-Type: application/json'
         ],
         CURLOPT_POSTFIELDS => json_encode(['text' => $texto])
@@ -211,7 +234,7 @@ $resultado = analizarSentimiento('El servicio técnico tardó mucho pero al fina
 echo "Sentimiento: " . $resultado['sentiment'] . "\n";
 echo "Confianza: " . number_format($resultado['score'] * 100, 2) . "%\n";
 // Output:
-// Sentimiento: neutral
+// Sentimiento: positive
 // Confianza: 62.18%
 ?>
 ```
@@ -226,12 +249,12 @@ using System.Text.Json;
 public class SentimentApiClient
 {
     private readonly HttpClient _client;
-    private const string API_URL = "https://api.apisdom.com/api/v1/sentiment/analyze";
+    private const string API_URL = "https://apisdom.com/api/v1/sentiment";
 
-    public SentimentApiClient(string token)
+    public SentimentApiClient(string apiKey)
     {
         _client = new HttpClient();
-        _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+        _client.DefaultRequestHeaders.Add("X-API-Key", apiKey);
     }
 
     public async Task<SentimentResult> AnalizarSentimientoAsync(string texto)
@@ -266,7 +289,7 @@ public class SentimentResult
 }
 
 // Ejemplo de uso
-var client = new SentimentApiClient("tu_token_jwt_aqui");
+var client = new SentimentApiClient("tu_api_key_aqui");
 var resultado = await client.AnalizarSentimientoAsync("¡Producto de primera calidad!");
 Console.WriteLine($"Sentimiento: {resultado.Sentiment}");
 Console.WriteLine($"Confianza: {resultado.Score:P2}");
@@ -292,7 +315,7 @@ for reseña in reseñas:
 # Output:
 # 'Excelente relación calidad-pr...' → positive (89%)
 # 'Llegó tarde y con el embalaje...' → negative (92%)
-# 'Hace lo que promete, nada más...' → neutral (67%)
+# 'Hace lo que promete, nada más...' → positive (67%)
 ```
 
 ### 2. Clasificación Automática de Tickets de Soporte
@@ -325,14 +348,13 @@ async function actualizarDashboard(comentarios) {
   const stats = {
     positivos: resultados.filter(r => r.sentiment === 'positive').length,
     negativos: resultados.filter(r => r.sentiment === 'negative').length,
-    neutros: resultados.filter(r => r.sentiment === 'neutral').length,
     promedioConfianza: resultados.reduce((a, b) => a + b.score, 0) / resultados.length
   };
   
   console.log('📊 Resumen de Satisfacción:');
   console.log(`   ✅ Positivos: ${stats.positivos}`);
   console.log(`   ❌ Negativos: ${stats.negativos}`);
-  console.log(`   ➖ Neutros: ${stats.neutros}`);
+  console.log(`   📊 Confianza promedio: ${(stats.promedioConfianza * 100).toFixed(1)}%`);
   
   return stats;
 }
@@ -408,7 +430,7 @@ El modelo `distilbert-base-uncased-finetuned-sst-2-english` está entrenado para
 **Limitaciones conocidas:**
 - El modelo fue entrenado en reseñas de películas (dataset SST-2)
 - Sarcasmo e ironía pueden ser mal interpretados
-- Textos muy técnicos o con jerga específica pueden dar resultados neutros
+- El modelo es BINARIO - siempre clasifica como positive o negative, nunca "neutro"
 
 ### Sobre el Truncamiento de Texto
 

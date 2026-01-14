@@ -10,7 +10,7 @@ Bienvenido a la documentación oficial de las APIs de Apisdom. Aquí encontrará
 
 | API | Descripción | Modelo IA | Documentación |
 |-----|-------------|-----------|---------------|
-| 🎭 **Sentiment API** | Detecta emociones en texto (positivo/negativo/neutro) | DistilBERT (SST-2) | [Ver docs](./SENTIMENT_API.md) |
+| 🎭 **Sentiment API** | Detecta emociones en texto (positivo/negativo) | DistilBERT (SST-2) | [Ver docs](./SENTIMENT_API.md) |
 | 🛡️ **Moderation API** | Identifica contenido tóxico e inapropiado | Toxic-BERT (Jigsaw) | [Ver docs](./MODERATION_API.md) |
 | 📈 **Prediction API** | Predicciones de series temporales | NeuralProphet | [Ver docs](./PREDICTION_API.md) |
 
@@ -22,13 +22,13 @@ Bienvenido a la documentación oficial de las APIs de Apisdom. Aquí encontrará
 
 1. Regístrate en [apisdom.com](https://apisdom.com)
 2. Ve al Dashboard
-3. Copia tu token JWT
+3. Copia tu API Key
 
 ### Paso 2: Tu Primera Llamada
 
 ```bash
-curl -X POST "https://api.apisdom.com/api/v1/sentiment/analyze" \
-  -H "Authorization: Bearer TU_TOKEN_AQUI" \
+curl -X POST "https://apisdom.com/api/v1/sentiment" \
+  -H "X-API-Key: TU_API_KEY_AQUI" \
   -H "Content-Type: application/json" \
   -d '{"text": "¡Me encanta este servicio!"}'
 ```
@@ -48,25 +48,49 @@ curl -X POST "https://api.apisdom.com/api/v1/sentiment/analyze" \
 
 ## 🔐 Autenticación
 
-Todas las APIs usan **Bearer Token (JWT)** en el header `Authorization`:
+Todas las APIs usan **API Key** en el header `X-API-Key`:
 
 ```
-Authorization: Bearer tu_token_jwt_aqui
+X-API-Key: tu_api_key_aqui
 ```
 
-### Obtener tu Token
+### Obtener tu API Key
 
 1. Inicia sesión en tu Dashboard
 2. Ve a "API Keys"
-3. Genera o copia tu token
+3. Genera o copia tu API Key
 
-### Duración del Token
+### Seguridad de la API Key
 
-Los tokens JWT tienen validez de **24 horas**. Después deberás renovarlo desde el Dashboard
+Las API Keys son permanentes y están vinculadas a tu cuenta de usuario. **NO compartas tu API Key** y mánténla segura.
 
-### Renovación de Tokens
+### Manejo de API Key Inválida
 
-Los tokens JWT expiran cada **30 días**. Recibirás un email de aviso 7 días antes de la expiración.
+Cuando la API Key es inválida o está revocada, recibirás un error **401 Unauthorized**. Tu aplicación cliente debe:
+
+1. Detectar el código de estado 401
+2. Solicitar un nuevo token mediante autenticación
+3. Reintentar la petición original con el nuevo token
+
+```python
+# Ejemplo de uso básico con API Key en Python
+import requests
+
+def call_api(url, data, api_key):
+    headers = {
+        "X-API-Key": api_key,
+        "Content-Type": "application/json"
+    }
+    
+    response = requests.post(url, json=data, headers=headers)
+    
+    if response.status_code == 401:
+        raise Exception("API Key inválida o revocada. Verifica en tu dashboard.")
+    
+    return response
+```
+
+> ⚠️ **Importante**: La API Key es permanente. Guárdala de forma segura y no la compartas.
 
 ---
 
@@ -160,19 +184,24 @@ class ApisdClient:
     Maneja: retry, backoff, rate limit, sin créditos.
     """
     
-    def __init__(self, token: str, base_url: str = "https://api.apisdom.com"):
-        self.token = token
-        self.base_url = base_url
+    def __init__(self, api_key: str):
+        self.api_key = api_key
         self.session = requests.Session()
         self.session.headers.update({
-            "Authorization": f"Bearer {token}",
+            "X-API-Key": api_key,
             "Content-Type": "application/json"
         })
+        # URLs públicas del proxy
+        self.urls = {
+            "sentiment": "https://apisdom.com/api/v1/sentiment",
+            "moderation": "https://apisdom.com/api/v1/moderacion",
+            "prediction": "https://apisdom.com/api/v1/predictions"
+        }
     
     def _request_with_retry(
         self, 
         method: str, 
-        endpoint: str, 
+        url: str, 
         json_data: dict | None = None,
         max_retries: int = 3
     ) -> dict[str, Any]:
@@ -185,8 +214,6 @@ class ApisdClient:
         - 402: NO reintenta (sin créditos)
         - 401: NO reintenta (token inválido)
         """
-        url = f"{self.base_url}{endpoint}"
-        
         for attempt in range(max_retries):
             try:
                 response = self.session.request(method, url, json=json_data, timeout=30)
@@ -237,8 +264,8 @@ class ApisdClient:
     def analizar_sentimiento(self, texto: str) -> dict:
         """Analiza sentimiento de un texto."""
         return self._request_with_retry(
-            "POST", 
-            "/api/v1/sentiment/analyze",
+            "POST",
+            f"{self.urls['sentiment']}/analyze",
             {"text": texto}
         )
     
@@ -246,7 +273,7 @@ class ApisdClient:
         """Detecta contenido tóxico."""
         return self._request_with_retry(
             "POST",
-            "/api/v1/moderation/moderate", 
+            f"{self.urls['moderation']}/moderate",
             {"text": texto}
         )
     
@@ -254,7 +281,7 @@ class ApisdClient:
         """Predice valores futuros de una serie temporal."""
         return self._request_with_retry(
             "POST",
-            "/api/v1/prediction/forecast",
+            f"{self.urls['prediction']}/forecast",
             {"dates": dates, "values": values, "periods": periods}
         )
 
@@ -271,7 +298,7 @@ class TokenInvalidoError(Exception):
 
 # === USO ===
 if __name__ == "__main__":
-    client = ApisdClient("tu_token_jwt")
+    client = ApisdClient("tu_api_key_aqui")
     
     try:
         resultado = client.analizar_sentimiento("¡Excelente servicio!")
@@ -297,27 +324,32 @@ if __name__ == "__main__":
  */
 class ApisdClient {
   private token: string;
-  private baseUrl: string;
+  private urls: Record<string, string>;
 
-  constructor(token: string, baseUrl = 'https://api.apisdom.com') {
+  constructor(token: string) {
     this.token = token;
-    this.baseUrl = baseUrl;
+    // URLs reales de los microservicios
+    this.urls = {
+      sentiment: 'https://apisdom.com/api/v1/sentiment',
+      moderation: 'https://apisdom.com/api/v1/moderacion',
+      prediction: 'https://apisdom.com/api/v1/predictions'
+    };
   }
 
   private async requestWithRetry<T>(
-    method: string,
+    service: 'sentiment' | 'moderation' | 'prediction',
     endpoint: string,
     body?: object,
     maxRetries = 3
   ): Promise<T> {
-    const url = `${this.baseUrl}${endpoint}`;
+    const url = `${this.urls[service]}${endpoint}`;
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
         const response = await fetch(url, {
-          method,
+          method: 'POST',
           headers: {
-            'Authorization': `Bearer ${this.token}`,
+            'X-API-Key': this.apiKey,
             'Content-Type': 'application/json',
           },
           body: body ? JSON.stringify(body) : undefined,
@@ -380,16 +412,16 @@ class ApisdClient {
 
   async analizarSentimiento(texto: string) {
     return this.requestWithRetry<SentimentResponse>(
-      'POST',
-      '/api/v1/sentiment/analyze',
+      'sentiment',
+      '/analyze',
       { text: texto }
     );
   }
 
   async moderarContenido(texto: string) {
     return this.requestWithRetry<ModerationResponse>(
-      'POST',
-      '/api/v1/moderation/moderate',
+      'moderation',
+      '/moderate',
       { text: texto }
     );
   }
@@ -412,7 +444,7 @@ class TokenInvalidoError extends Error {
 // Tipos de respuesta
 interface SentimentResponse {
   text: string;
-  sentiment: 'positive' | 'negative' | 'neutral';
+  sentiment: 'positive' | 'negative';  // Modelo binario SST-2
   score: number;
   warning: string | null;
 }
@@ -425,7 +457,7 @@ interface ModerationResponse {
 }
 
 // === USO ===
-const client = new ApisdClient('tu_token_jwt');
+const client = new ApisdClient('tu_api_key_aqui');
 
 try {
   const resultado = await client.analizarSentimiento('¡Excelente!');
@@ -453,17 +485,51 @@ try {
 
 ---
 
+## � Planes y Precios
+
+### APIs de Texto (Sentiment + Moderation)
+
+| Plan | Precio | Cuota | Rate Limit |
+|------|--------|-------|------------|
+| **Prueba Gratuita** | €0 | 1,000 créditos (único uso) | 10 req/min |
+| **Plan Starter** | €4.99/mes | 10,000 créditos/mes | 60 req/min |
+| **Plan Pro** | €19.99/mes | 100,000 créditos/mes | 300 req/min |
+
+### APIs de Ventas (Prediction + Recommendations)
+
+| Plan | Precio | Cuota | Rate Limit |
+|------|--------|-------|------------|
+| **Sandbox Gratuito** | €0 | 200 recom + 50 pred (único uso) | 10 req/min |
+| **Plan Tienda** | €9.99/mes | 2,000 recom + 500 pred/mes | 60 req/min |
+| **Plan Marketplace** | €39.99/mes | 15,000 recom + 3,000 pred/mes | 300 req/min |
+
+> **⚠️ Importante sobre planes gratuitos:**
+> - Los créditos gratuitos son de **uso único** y NO se resetean.
+> - Los planes de pago se resetean el **día 1 de cada mes a las 00:00 UTC**.
+
+---
+
 ## 📊 Rate Limiting
 
 Cada API tiene límites de peticiones por minuto según tu plan:
 
 | Plan | Límite |
 |------|--------|
-| Free | 10 req/min |
-| Starter | 60 req/min |
-| Pro | 300 req/min |
+| Gratuito | 10 req/min |
+| Starter / Tienda | 60 req/min |
+| Pro / Marketplace | 300 req/min |
 
 Si excedes el límite recibirás error 429 con header `Retry-After`.
+
+### Headers Informativos
+
+La API devuelve headers que te permiten controlar tu consumo programáticamente:
+
+| Header | Descripción |
+|--------|-------------|
+| `X-RateLimit-Limit` | Tu límite de peticiones por minuto |
+| `X-RateLimit-Remaining` | Peticiones restantes en la ventana actual |
+| `Retry-After` | Segundos a esperar si recibes 429 |
 
 ---
 
@@ -493,9 +559,9 @@ Si excedes el límite recibirás error 429 con header `Retry-After`.
 
 | API | URL Base |
 |-----|----------|
-| Sentiment | `https://api.apisdom.com/api/v1/sentiment` |
-| Moderation | `https://api.apisdom.com/api/v1/moderation` |
-| Prediction | `https://api.apisdom.com/api/v1/prediction` |
+| Sentiment | `https://apisdom.com/api/v1/sentiment` |
+| Moderation | `https://apisdom.com/api/v1/moderacion` |
+| Prediction | `https://apisdom.com/api/v1/predictions` |
 
 ---
 
@@ -505,9 +571,9 @@ Cada API expone un endpoint de health check (sin autenticación):
 
 | API | Endpoint |
 |-----|----------|
-| Sentiment | `GET /api/v1/sentiment/health` |
-| Moderation | `GET /api/v1/moderation/health` |
-| Prediction | `GET /api/v1/prediction/health` |
+| Sentiment | `GET https://sentiment-api-461269678728.europe-west1.run.app/health` |
+| Moderation | `GET https://moderation-api-461269678728.europe-west1.run.app/health` |
+| Prediction | `GET https://prediction-api-461269678728.europe-west1.run.app/health` |
 
 **Respuesta:**
 ```json
@@ -528,11 +594,11 @@ Cada API expone un endpoint de health check (sin autenticación):
 ```python
 import requests
 
-def analizar_sentimiento(texto, token):
+def analizar_sentimiento(texto, api_key):
     response = requests.post(
-        "https://api.apisdom.com/api/v1/sentiment/analyze",
+        "https://apisdom.com/api/v1/sentiment",
         headers={
-            "Authorization": f"Bearer {token}",
+            "X-API-Key": api_key,
             "Content-Type": "application/json"
         },
         json={"text": texto}
@@ -541,7 +607,7 @@ def analizar_sentimiento(texto, token):
     return response.json()
 
 # Uso
-resultado = analizar_sentimiento("¡Excelente producto!", "tu_token")
+resultado = analizar_sentimiento("¡Excelente producto!", "tu_api_key")
 print(f"{resultado['sentiment']}: {resultado['score']:.0%}")
 # Output: positive: 97%
 ```
@@ -552,10 +618,10 @@ print(f"{resultado['sentiment']}: {resultado['score']:.0%}")
 
 ```javascript
 async function moderar(texto, token) {
-  const res = await fetch('https://api.apisdom.com/api/v1/moderation/moderate', {
+  const res = await fetch('https://apisdom.com/api/v1/moderacion', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${token}`,
+      'X-API-Key': apiKey,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({ text: texto })
@@ -566,7 +632,7 @@ async function moderar(texto, token) {
 }
 
 // Uso
-const resultado = await moderar('Gracias por tu ayuda', 'tu_token');
+const resultado = await moderar('Gracias por tu ayuda', 'tu_api_key');
 console.log(`Tóxico: ${resultado.is_toxic}`);
 // Output: Tóxico: false
 ```
@@ -576,8 +642,8 @@ console.log(`Tóxico: ${resultado.is_toxic}`);
 <summary><b>cURL - Predecir Serie Temporal</b></summary>
 
 ```bash
-curl -X POST "https://api.apisdom.com/api/v1/prediction/forecast" \
-  -H "Authorization: Bearer tu_token" \
+curl -X POST "https://apisdom.com/api/v1/predictions" \
+  -H "X-API-Key: tu_api_key" \
   -H "Content-Type: application/json" \
   -d '{
     "dates": ["2024-01-01","2024-01-02","2024-01-03","2024-01-04","2024-01-05",

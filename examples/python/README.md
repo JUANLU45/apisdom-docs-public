@@ -18,7 +18,7 @@ pip install requests
 ## Uso Rápido
 
 ```bash
-# 1. Edita el archivo y añade tu token
+# 1. Edita el archivo y añade tu API Key
 # 2. Ejecuta
 python quickstart.py
 ```
@@ -29,13 +29,13 @@ El archivo `apisdom_client.py` incluye:
 
 - ✅ Retry automático con backoff exponencial
 - ✅ Manejo de rate limit (429)
-- ✅ Excepciones específicas para créditos (402) y token inválido (401)
+- ✅ Excepciones específicas para créditos (402) y API Key inválida (401)
 - ✅ Timeout configurable
 
 ```python
 from apisdom_client import ApisdClient, CreditosInsuficientesError
 
-client = ApisdClient("tu_token")
+client = ApisdClient("tu_api_key")
 
 try:
     resultado = client.analizar_sentimiento("¡Excelente!")

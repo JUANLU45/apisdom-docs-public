@@ -10,32 +10,57 @@ Genera predicciones precisas para datos históricos como ventas, tráfico web, i
 
 | Propiedad | Valor |
 |-----------|-------|
-| **URL Base** | `https://api.apisdom.com/api/v1/prediction` |
+| **URL Base** | `https://apisdom.com/api/v1` |
 | **Método** | `POST` |
-| **Autenticación** | Bearer Token (JWT) |
+| **Autenticación** | API Key (Header `X-API-Key`) |
 | **Tipo de Crédito** | `prediction` |
 | **Coste por llamada** | 1 crédito |
 | **Modelo IA** | NeuralProphet (neural network forecasting) |
 | **Horizonte máximo** | 365 días/periodos |
 
+### ⏱️ Rate Limits
+
+| Plan | Límite | Cuota Mensual | Precio | Epochs |
+|------|--------|---------------|--------|--------|
+| **Sandbox Gratuito** | 10 req/min | 50 predicciones (único uso) | €0 | 10 |
+| **Plan Tienda** | 60 req/min | 500 predicciones/mes | €9.99/mes | 10 |
+| **Plan Marketplace** | 300 req/min | 3,000 predicciones/mes | €39.99/mes | 50 |
+
+> **Nota sobre cuotas:**
+> - **Sandbox Gratuito**: Los 50 créditos de predicción son de uso único y NO se resetean.
+> - **Planes de pago**: Las cuotas se resetean el día 1 de cada mes a las 00:00 UTC.
+> - **Epochs**: Plan Marketplace entrena con 50 epochs para mayor precisión; los demás usan 10 epochs.
+
+> ⚠️ **Nota sobre consumo de CPU**: Las predicciones con NeuralProphet son intensivas en CPU ya que entrenan un modelo de red neuronal por cada request. Si excedes el rate limit, recibirás error `429 Too Many Requests` con header `Retry-After`.
+
+### 📊 Headers Informativos
+
+La API devuelve headers que te permiten controlar tu consumo:
+
+| Header | Descripción |
+|--------|-------------|
+| `X-RateLimit-Limit` | Tu límite de peticiones por minuto |
+| `X-RateLimit-Remaining` | Peticiones restantes en la ventana actual |
+| `Retry-After` | Segundos a esperar si recibes 429 |
+
 ---
 
 ## 🔐 Autenticación
 
-Todas las peticiones requieren un token JWT en el header `Authorization`:
+Todas las peticiones requieren tu API Key en el header `X-API-Key`:
 
 ```
-Authorization: Bearer tu_token_jwt_aqui
+X-API-Key: tu_api_key_aqui
 ```
 
-Puedes obtener tu token desde el panel de usuario en [apisdom.com/dashboard](https://apisdom.com/dashboard).
+Puedes obtener tu API Key desde el panel de usuario en [apisdom.com/dashboard](https://apisdom.com/dashboard).
 
 ---
 
 ## 📥 Endpoint: Generar Predicción
 
 ```
-POST /api/v1/prediction/forecast
+POST https://apisdom.com/api/v1/predictions
 ```
 
 ### Request Body
@@ -130,8 +155,8 @@ import requests
 from datetime import datetime, timedelta
 from typing import List
 
-API_URL = "https://api.apisdom.com/api/v1/prediction/forecast"
-TOKEN = "tu_token_jwt_aqui"
+API_URL = "https://apisdom.com/api/v1/predictions"
+API_KEY = "tu_api_key_aqui"
 
 def predecir(
     fechas: List[str], 
@@ -159,7 +184,7 @@ def predecir(
     response = requests.post(
         API_URL,
         headers={
-            "Authorization": f"Bearer {TOKEN}",
+            "X-API-Key": API_KEY,
             "Content-Type": "application/json"
         },
         json={
@@ -225,8 +250,8 @@ for pred in resultado['predictions']:
 ### JavaScript / Node.js
 
 ```javascript
-const API_URL = 'https://api.apisdom.com/api/v1/prediction/forecast';
-const TOKEN = 'tu_token_jwt_aqui';
+const API_URL = 'https://apisdom.com/api/v1/predictions';
+const API_KEY = 'tu_api_key_aqui';
 
 async function predecir(fechas, valores, periodos) {
   /**
@@ -249,7 +274,7 @@ async function predecir(fechas, valores, periodos) {
   const response = await fetch(API_URL, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${TOKEN}`,
+      'X-API-Key': API_KEY,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({ dates: fechas, values: valores, periods: periodos })
@@ -317,8 +342,8 @@ predecirTraficoWeb();
 
 ```bash
 # Predicción básica con 10 puntos de datos mínimos
-curl -X POST "https://api.apisdom.com/api/v1/prediction/forecast" \
-  -H "Authorization: Bearer tu_token_jwt_aqui" \
+curl -X POST "https://apisdom.com/api/v1/predictions" \
+  -H "X-API-Key: tu_api_key_aqui" \
   -H "Content-Type: application/json" \
   -d '{
     "dates": [
@@ -330,8 +355,8 @@ curl -X POST "https://api.apisdom.com/api/v1/prediction/forecast" \
   }'
 
 # Con jq para formatear
-curl -s -X POST "https://api.apisdom.com/api/v1/prediction/forecast" \
-  -H "Authorization: Bearer tu_token_jwt_aqui" \
+curl -s -X POST "https://apisdom.com/api/v1/predictions" \
+  -H "X-API-Key: tu_api_key_aqui" \
   -H "Content-Type: application/json" \
   -d @datos_ventas.json | jq '.predictions'
 ```
@@ -340,8 +365,8 @@ curl -s -X POST "https://api.apisdom.com/api/v1/prediction/forecast" \
 
 ```php
 <?php
-$api_url = 'https://api.apisdom.com/api/v1/prediction/forecast';
-$token = 'tu_token_jwt_aqui';
+$api_url = 'https://apisdom.com/api/v1/predictions';
+$api_key = 'tu_api_key_aqui';
 
 function predecir($fechas, $valores, $periodos) {
     global $api_url, $token;
@@ -362,7 +387,7 @@ function predecir($fechas, $valores, $periodos) {
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST => true,
         CURLOPT_HTTPHEADER => [
-            'Authorization: Bearer ' . $token,
+            'X-API-Key: ' . $api_key,
             'Content-Type: application/json'
         ],
         CURLOPT_POSTFIELDS => json_encode([
@@ -436,12 +461,12 @@ using System.Text.Json.Serialization;
 public class PredictionApiClient
 {
     private readonly HttpClient _client;
-    private const string API_URL = "https://api.apisdom.com/api/v1/prediction/forecast";
+    private const string API_URL = "https://apisdom.com/api/v1/predictions";
 
-    public PredictionApiClient(string token)
+    public PredictionApiClient(string apiKey)
     {
         _client = new HttpClient();
-        _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+        _client.DefaultRequestHeaders.Add("X-API-Key", apiKey);
     }
 
     public async Task<PredictionResult> PredecirAsync(
@@ -505,7 +530,7 @@ public class Prediction
 }
 
 // Ejemplo de uso
-var client = new PredictionApiClient("tu_token_jwt_aqui");
+var client = new PredictionApiClient("tu_api_key_aqui");
 
 // Generar datos de ejemplo (últimos 60 días)
 var fechas = new List<string>();
@@ -607,7 +632,7 @@ class PredictorVentas:
         return resultado
 
 # Uso
-predictor = PredictorVentas("tu_token_jwt_aqui")
+predictor = PredictorVentas("tu_api_key_aqui")
 reporte = predictor.generar_reporte(datos_ventas, 30)
 ```
 
@@ -766,9 +791,9 @@ Tus datos → DataFrame → Entrenamiento NeuralProphet → Predicción → Vali
 | Aspecto | Valor Real | Archivo Fuente |
 |---------|------------|----------------|
 | **Motor** | `NeuralProphet` (no Prophet clásico) | prediction_service.py |
-| **Estacionalidad** | `daily=True, weekly=True, yearly=False` | prediction_service.py línea 37 |
-| **Epochs Free/Starter** | 10 | prediction_service.py línea 81 |
-| **Epochs Pro** | 50 | prediction_service.py línea 81 |
+| **Estacionalidad** | `daily=True, weekly=True, yearly=False` | prediction_service.py líneas 36-38 |
+| **Epochs Gratuito/Tienda** | 10 | prediction_service.py línea 79 |
+| **Epochs Marketplace** | 50 | prediction_service.py línea 79 |
 | **Learning rate** | 1.0 | prediction_service.py línea 42 |
 | **n_lags** | 0 (autoregresión desactivada) | prediction_service.py línea 40 |
 | **Threshold MAPE warning** | 0.4 (40%) | prediction_service.py línea 93 |
@@ -790,8 +815,8 @@ def calculate_mape(actual, predicted):
 
 | Plan | Epochs | Impacto |
 |------|--------|---------|
-| Free/Starter | 10 | Modelo más simple, entrena rápido (~2-5s), MAPE típico +5-10% |
-| Pro | 50 | Modelo más refinado, entrena más (~10-15s), mejor precisión |
+| Sandbox Gratuito / Tienda | 10 | Modelo más simple, entrena rápido (~2-5s), MAPE típico +5-10% |
+| Marketplace | 50 | Modelo más refinado, entrena más (~10-15s), mejor precisión |
 
 **Nota honesta**: Para muchos casos de uso, 10 epochs son suficientes. La diferencia se nota principalmente en series con patrones complejos o estacionalidad fuerte.
 

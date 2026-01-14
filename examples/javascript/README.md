@@ -13,7 +13,7 @@ Ejemplos de uso de las APIs de Apisdom en JavaScript/Node.js.
 ```html
 <script src="apisdom-client.js"></script>
 <script>
-  const client = new ApisdClient('tu_token');
+  const client = new ApisdClient('tu_api_key');
   
   client.analizarSentimiento('¡Excelente producto!')
     .then(r => console.log(r.sentiment))
@@ -26,7 +26,7 @@ Ejemplos de uso de las APIs de Apisdom en JavaScript/Node.js.
 ```javascript
 const { ApisdClient, CreditosInsuficientesError } = require('./apisdom-client');
 
-const client = new ApisdClient('tu_token');
+const client = new ApisdClient('tu_api_key');
 
 async function main() {
   try {
@@ -56,7 +56,7 @@ El archivo incluye typedefs JSDoc. Para TypeScript completo, crea un archivo `.d
 
 ```typescript
 declare class ApisdClient {
-  constructor(token: string, baseUrl?: string);
+  constructor(apiKey: string, baseUrl?: string);
   analizarSentimiento(texto: string): Promise<SentimentResponse>;
   moderarContenido(texto: string): Promise<ModerationResponse>;
   predecirSerie(dates: string[], values: number[], periods?: number): Promise<PredictionResponse>;
@@ -64,7 +64,7 @@ declare class ApisdClient {
 
 interface SentimentResponse {
   text: string;
-  sentiment: 'positive' | 'negative' | 'neutral';
+  sentiment: 'positive' | 'negative';  // Modelo binario SST-2
   score: number;
   warning: string | null;
 }

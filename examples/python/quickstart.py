@@ -6,8 +6,8 @@ Documentación: https://github.com/apisdom/docs
 import requests
 
 # Configuración
-TOKEN = "tu_token_jwt_aqui"  # Obtén tu token en apisdom.com/dashboard
-BASE_URL = "https://api.apisdom.com"
+API_KEY = "tu_api_key_aqui"  # Obtén tu API Key en apisdom.com/dashboard
+BASE_URL = "https://apisdom.com"
 
 
 def ejemplo_sentimiento():
@@ -16,8 +16,8 @@ def ejemplo_sentimiento():
     print("-" * 40)
     
     response = requests.post(
-        f"{BASE_URL}/api/v1/sentiment/analyze",
-        headers={"Authorization": f"Bearer {TOKEN}"},
+        f"{BASE_URL}/api/v1/sentiment",
+        headers={"X-API-Key": API_KEY},
         json={"text": "¡Este producto es increíble! Muy recomendado."}
     )
     
@@ -36,8 +36,8 @@ def ejemplo_moderacion():
     print("-" * 40)
     
     response = requests.post(
-        f"{BASE_URL}/api/v1/moderation/moderate",
-        headers={"Authorization": f"Bearer {TOKEN}"},
+        f"{BASE_URL}/api/v1/moderacion",
+        headers={"X-API-Key": API_KEY},
         json={"text": "Gracias por tu excelente trabajo en este proyecto."}
     )
     
@@ -63,8 +63,8 @@ def ejemplo_prediccion():
     }
     
     response = requests.post(
-        f"{BASE_URL}/api/v1/prediction/forecast",
-        headers={"Authorization": f"Bearer {TOKEN}"},
+        f"{BASE_URL}/api/v1/predictions",
+        headers={"X-API-Key": API_KEY},
         json=datos
     )
     
@@ -82,8 +82,8 @@ if __name__ == "__main__":
     print("=" * 50)
     print("📚 EJEMPLOS DE APISDOM APIs")
     print("=" * 50)
-    print(f"\n⚠️ Recuerda cambiar TOKEN por tu token real")
-    print(f"   Obtén tu token en: https://apisdom.com/dashboard\n")
+    print(f"\n⚠️ Recuerda cambiar API_KEY por tu API Key real")
+    print(f"   Obtén tu API Key en: https://apisdom.com/dashboard\n")
     
     ejemplo_sentimiento()
     ejemplo_moderacion()

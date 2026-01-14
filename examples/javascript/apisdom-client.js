@@ -11,11 +11,11 @@
  */
 class ApisdClient {
   /**
-   * @param {string} token - Tu token JWT de apisdom.com/dashboard
+   * @param {string} apiKey - Tu API Key de apisdom.com/dashboard
    * @param {string} baseUrl - URL base de la API
    */
-  constructor(token, baseUrl = 'https://api.apisdom.com') {
-    this.token = token;
+  constructor(apiKey, baseUrl = 'https://apisdom.com') {
+    this.apiKey = apiKey;
     this.baseUrl = baseUrl;
   }
 
@@ -31,7 +31,7 @@ class ApisdClient {
         const response = await fetch(url, {
           method,
           headers: {
-            'Authorization': `Bearer ${this.token}`,
+            'X-API-Key': this.apiKey,
             'Content-Type': 'application/json',
           },
           body: body ? JSON.stringify(body) : undefined,
@@ -103,7 +103,7 @@ class ApisdClient {
   async analizarSentimiento(texto) {
     return this._requestWithRetry(
       'POST',
-      '/api/v1/sentiment/analyze',
+      '/api/v1/sentiment',
       { text: texto }
     );
   }
@@ -116,7 +116,7 @@ class ApisdClient {
   async moderarContenido(texto) {
     return this._requestWithRetry(
       'POST',
-      '/api/v1/moderation/moderate',
+      '/api/v1/moderacion',
       { text: texto }
     );
   }
@@ -141,7 +141,7 @@ class ApisdClient {
 
     return this._requestWithRetry(
       'POST',
-      '/api/v1/prediction/forecast',
+      '/api/v1/predictions',
       { dates, values, periods }
     );
   }
@@ -171,7 +171,7 @@ class TokenInvalidoError extends Error {
 /**
  * @typedef {Object} SentimentResponse
  * @property {string} text - Texto analizado
- * @property {'positive'|'negative'|'neutral'} sentiment - Sentimiento detectado
+ * @property {'positive'|'negative'} sentiment - Sentimiento detectado (modelo binario SST-2)
  * @property {number} score - Confianza (0.0 a 1.0)
  * @property {string|null} warning - Aviso si texto truncado
  */
@@ -198,8 +198,8 @@ class TokenInvalidoError extends Error {
 
 // Ejemplo de uso en navegador o Node.js
 async function ejemplos() {
-  const TOKEN = 'tu_token_jwt_aqui';
-  const client = new ApisdClient(TOKEN);
+  const API_KEY = 'tu_api_key_aqui';
+  const client = new ApisdClient(API_KEY);
 
   console.log('=' .repeat(50));
   console.log('📚 EJEMPLOS DE APISDOM APIs');

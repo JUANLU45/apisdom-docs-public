@@ -10,32 +10,55 @@ Identifica automáticamente contenido ofensivo, insultos, amenazas, discurso de 
 
 | Propiedad | Valor |
 |-----------|-------|
-| **URL Base** | `https://api.apisdom.com/api/v1/moderation` |
+| **URL Base** | `https://apisdom.com/api/v1` |
 | **Método** | `POST` |
-| **Autenticación** | Bearer Token (JWT) |
+| **Autenticación** | API Key (Header `X-API-Key`) |
 | **Tipo de Crédito** | `text` |
 | **Coste por llamada** | 1 crédito |
 | **Modelo IA** | Toxic-BERT (fine-tuned en Jigsaw dataset) |
 | **Categorías detectadas** | Múltiples (según modelo toxic-bert) |
 
+### ⏱️ Rate Limits
+
+| Plan | Límite | Cuota Mensual | Precio |
+|------|--------|---------------|--------|
+| **Prueba Gratuita** | 10 req/min | 1,000 créditos (único uso) | €0 |
+| **Plan Starter** | 60 req/min | 10,000 créditos/mes | €4.99/mes |
+| **Plan Pro** | 300 req/min | 100,000 créditos/mes | €19.99/mes |
+
+> **Nota sobre cuotas:**
+> - **Plan Gratuito**: Los 1,000 créditos son de uso único y NO se resetean.
+> - **Planes de pago**: Las cuotas se resetean el día 1 de cada mes a las 00:00 UTC.
+> - Si excedes el rate limit, recibirás error `429 Too Many Requests` con header `Retry-After`.
+
+### 📊 Headers Informativos
+
+La API devuelve headers que te permiten controlar tu consumo:
+
+| Header | Descripción |
+|--------|-------------|
+| `X-RateLimit-Limit` | Tu límite de peticiones por minuto |
+| `X-RateLimit-Remaining` | Peticiones restantes en la ventana actual |
+| `Retry-After` | Segundos a esperar si recibes 429 |
+
 ---
 
 ## 🔐 Autenticación
 
-Todas las peticiones requieren un token JWT en el header `Authorization`:
+Todas las peticiones requieren tu API Key en el header `X-API-Key`:
 
 ```
-Authorization: Bearer tu_token_jwt_aqui
+X-API-Key: tu_api_key_aqui
 ```
 
-Puedes obtener tu token desde el panel de usuario en [apisdom.com/dashboard](https://apisdom.com/dashboard).
+Puedes obtener tu API Key desde el panel de usuario en [apisdom.com/dashboard](https://apisdom.com/dashboard).
 
 ---
 
 ## 📥 Endpoint: Moderar Contenido
 
 ```
-POST /api/v1/moderation/moderate
+POST https://apisdom.com/api/v1/moderacion
 ```
 
 ### Request Body
@@ -106,8 +129,8 @@ POST /api/v1/moderation/moderate
 import requests
 from typing import Optional
 
-API_URL = "https://api.apisdom.com/api/v1/moderation/moderate"
-TOKEN = "tu_token_jwt_aqui"
+API_URL = "https://apisdom.com/api/v1/moderacion"
+API_KEY = "tu_api_key_aqui"
 
 def moderar_contenido(texto: str) -> dict:
     """
@@ -122,7 +145,7 @@ def moderar_contenido(texto: str) -> dict:
     response = requests.post(
         API_URL,
         headers={
-            "Authorization": f"Bearer {TOKEN}",
+            "X-API-Key": API_KEY,
             "Content-Type": "application/json"
         },
         json={"text": texto}
@@ -178,8 +201,8 @@ else:
 ### JavaScript / Node.js
 
 ```javascript
-const API_URL = 'https://api.apisdom.com/api/v1/moderation/moderate';
-const TOKEN = 'tu_token_jwt_aqui';
+const API_URL = 'https://apisdom.com/api/v1/moderacion';
+const API_KEY = 'tu_api_key_aqui';
 
 async function moderarContenido(texto) {
   /**
@@ -190,7 +213,7 @@ async function moderarContenido(texto) {
   const response = await fetch(API_URL, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${TOKEN}`,
+      'X-API-Key': API_KEY,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({ text: texto })
@@ -257,14 +280,14 @@ procesarComentario('Este tutorial es muy útil, gracias por compartir!');
 
 ```bash
 # Ejemplo básico
-curl -X POST "https://api.apisdom.com/api/v1/moderation/moderate" \
-  -H "Authorization: Bearer tu_token_jwt_aqui" \
+curl -X POST "https://apisdom.com/api/v1/moderacion" \
+  -H "X-API-Key: tu_api_key_aqui" \
   -H "Content-Type: application/json" \
   -d '{"text": "Excelente artículo, muy bien explicado."}'
 
 # Con jq para formatear la respuesta
-curl -s -X POST "https://api.apisdom.com/api/v1/moderation/moderate" \
-  -H "Authorization: Bearer tu_token_jwt_aqui" \
+curl -s -X POST "https://apisdom.com/api/v1/moderacion" \
+  -H "X-API-Key: tu_api_key_aqui" \
   -H "Content-Type: application/json" \
   -d '{"text": "Este contenido de ejemplo es totalmente inocente."}' | jq .
 ```
@@ -273,8 +296,8 @@ curl -s -X POST "https://api.apisdom.com/api/v1/moderation/moderate" \
 
 ```php
 <?php
-$api_url = 'https://api.apisdom.com/api/v1/moderation/moderate';
-$token = 'tu_token_jwt_aqui';
+$api_url = 'https://apisdom.com/api/v1/moderacion';
+$api_key = 'tu_api_key_aqui';
 
 function moderarContenido($texto) {
     global $api_url, $token;
@@ -284,7 +307,7 @@ function moderarContenido($texto) {
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST => true,
         CURLOPT_HTTPHEADER => [
-            'Authorization: Bearer ' . $token,
+            'X-API-Key: ' . $api_key,
             'Content-Type: application/json'
         ],
         CURLOPT_POSTFIELDS => json_encode(['text' => $texto])
@@ -338,12 +361,12 @@ using System.Text.Json.Serialization;
 public class ModerationApiClient
 {
     private readonly HttpClient _client;
-    private const string API_URL = "https://api.apisdom.com/api/v1/moderation/moderate";
+    private const string API_URL = "https://apisdom.com/api/v1/moderacion";
 
-    public ModerationApiClient(string token)
+    public ModerationApiClient(string apiKey)
     {
         _client = new HttpClient();
-        _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+        _client.DefaultRequestHeaders.Add("X-API-Key", apiKey);
     }
 
     public async Task<ModerationResult> ModerarContenidoAsync(string texto)
@@ -417,7 +440,7 @@ public class ToxicityCategories
 }
 
 // Ejemplo de uso
-var client = new ModerationApiClient("tu_token_jwt_aqui");
+var client = new ModerationApiClient("tu_api_key_aqui");
 var resultado = await client.ModerarContenidoAsync("Gracias por la información!");
 
 if (client.DebeBloquear(resultado))
@@ -438,9 +461,9 @@ else
 
 ```python
 class SistemaModeración:
-    def __init__(self, token):
-        self.token = token
-        self.api_url = "https://api.apisdom.com/api/v1/moderation/moderate"
+    def __init__(self, api_key):
+        self.api_key = api_key
+        self.api_url = "https://apisdom.com/api/v1/moderacion"
     
     def evaluar(self, texto):
         """Evalúa un texto y devuelve la acción recomendada."""
@@ -483,7 +506,7 @@ class SistemaModeración:
         pass
 
 # Uso
-moderador = SistemaModeración("tu_token_jwt_aqui")
+moderador = SistemaModeración("tu_api_key_aqui")
 resultado = moderador.evaluar("Tu comentario aquí")
 print(f"Acción: {resultado['accion']}")
 ```
@@ -531,7 +554,7 @@ class ChatModerado {
 }
 
 // Ejemplo en un servidor WebSocket
-const chat = new ChatModerado('tu_token_jwt_aqui');
+const chat = new ChatModerado('tu_api_key_aqui');
 
 socket.on('nuevo_mensaje', async (data) => {
   const resultado = await chat.procesarMensaje(data.userId, data.texto);

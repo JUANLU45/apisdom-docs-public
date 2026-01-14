@@ -65,19 +65,19 @@ Validaciones de cada API individualmente:
 | Test | Descripción | Estado |
 |------|-------------|--------|
 | `test_sentiment_api_health` | Endpoint `/health` responde | ✅ Passed |
-| `test_sentiment_api_analyze_endpoint` | Endpoint `/analyze` funciona | ⏭️ Skipped* |
+| `test_sentiment_api_endpoint` | Endpoint `/sentiment` funciona | ⏭️ Skipped* |
 
 ### 🛡️ Moderation API
 | Test | Descripción | Estado |
 |------|-------------|--------|
 | `test_moderation_api_health` | Endpoint `/health` responde | ✅ Passed |
-| `test_moderation_api_moderate_endpoint` | Endpoint `/moderate` funciona | ⏭️ Skipped* |
+| `test_moderation_api_endpoint` | Endpoint `/moderacion` funciona | ⏭️ Skipped* |
 
 ### 📈 Prediction API
 | Test | Descripción | Estado |
 |------|-------------|--------|
 | `test_prediction_api_health` | Endpoint `/health` responde | ✅ Passed |
-| `test_prediction_api_predict_endpoint` | Endpoint `/forecast` funciona | ⏭️ Skipped* |
+| `test_prediction_api_endpoint` | Endpoint `/predictions` funciona | ⏭️ Skipped* |
 
 ### 🔧 API Core
 | Test | Descripción | Estado |

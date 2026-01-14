@@ -24,7 +24,7 @@ Apisdom ofrece APIs de inteligencia artificial listas para producción. Intégra
 
 | API | Descripción | Modelo IA | Documentación |
 |-----|-------------|-----------|---------------|
-| 🎭 **Sentiment API** | Detecta emociones en texto (positivo/negativo/neutro) | DistilBERT (SST-2) | [Ver docs](./docs/SENTIMENT_API.md) |
+| 🎭 **Sentiment API** | Detecta emociones en texto (positivo/negativo) | DistilBERT (SST-2) | [Ver docs](./docs/SENTIMENT_API.md) |
 | 🛡️ **Moderation API** | Identifica contenido tóxico e inapropiado | Toxic-BERT (Jigsaw) | [Ver docs](./docs/MODERATION_API.md) |
 | 📈 **Prediction API** | Predicciones de series temporales | NeuralProphet | [Ver docs](./docs/PREDICTION_API.md) |
 
@@ -37,14 +37,14 @@ Apisdom ofrece APIs de inteligencia artificial listas para producción. Intégra
 ```
 1. Regístrate en https://apisdom.com
 2. Ve al Dashboard
-3. Copia tu token JWT
+3. Copia tu API Key
 ```
 
 ### 2. Tu Primera Llamada
 
 ```bash
-curl -X POST "https://api.apisdom.com/api/v1/sentiment/analyze" \
-  -H "Authorization: Bearer TU_TOKEN_AQUI" \
+curl -X POST "https://apisdom.com/api/v1/sentiment" \
+  -H "X-API-Key: TU_API_KEY_AQUI" \
   -H "Content-Type: application/json" \
   -d '{"text": "¡Me encanta este servicio!"}'
 ```
@@ -68,15 +68,15 @@ curl -X POST "https://api.apisdom.com/api/v1/sentiment/analyze" \
 ```python
 import requests
 
-def analizar_sentimiento(texto, token):
+def analizar_sentimiento(texto, api_key):
     response = requests.post(
-        "https://api.apisdom.com/api/v1/sentiment/analyze",
-        headers={"Authorization": f"Bearer {token}"},
+        "https://apisdom.com/api/v1/sentiment",
+        headers={"X-API-Key": api_key},
         json={"text": texto}
     )
     return response.json()
 
-resultado = analizar_sentimiento("¡Excelente producto!", "tu_token")
+resultado = analizar_sentimiento("¡Excelente producto!", "tu_api_key")
 print(f"{resultado['sentiment']}: {resultado['score']:.0%}")
 # Output: positive: 97%
 ```
@@ -84,11 +84,11 @@ print(f"{resultado['sentiment']}: {resultado['score']:.0%}")
 ### JavaScript
 
 ```javascript
-async function analizarSentimiento(texto, token) {
-  const res = await fetch('https://api.apisdom.com/api/v1/sentiment/analyze', {
+async function analizarSentimiento(texto, apiKey) {
+  const res = await fetch('https://apisdom.com/api/v1/sentiment', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${token}`,
+      'X-API-Key': apiKey,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({ text: texto })
@@ -96,7 +96,7 @@ async function analizarSentimiento(texto, token) {
   return res.json();
 }
 
-const resultado = await analizarSentimiento('¡Excelente!', 'tu_token');
+const resultado = await analizarSentimiento('¡Excelente!', 'tu_api_key');
 console.log(`${resultado.sentiment}: ${(resultado.score * 100).toFixed(0)}%`);
 ```
 
@@ -129,13 +129,13 @@ console.log(`${resultado.sentiment}: ${(resultado.score * 100).toFixed(0)}%`);
 
 ## 🔐 Autenticación
 
-Todas las APIs usan **Bearer Token (JWT)**:
+Todas las APIs usan **API Key** en el header `X-API-Key`:
 
 ```
-Authorization: Bearer tu_token_jwt_aqui
+X-API-Key: tu_api_key_aqui
 ```
 
-Obtén tu token en [apisdom.com/dashboard](https://apisdom.com/dashboard).
+Obtén tu API Key en [apisdom.com/dashboard](https://apisdom.com/dashboard).
 
 ---
 
@@ -144,9 +144,9 @@ Obtén tu token en [apisdom.com/dashboard](https://apisdom.com/dashboard).
 Verifica el estado de los servicios (sin autenticación):
 
 ```bash
-curl https://api.apisdom.com/api/v1/sentiment/health
-curl https://api.apisdom.com/api/v1/moderation/health
-curl https://api.apisdom.com/api/v1/prediction/health
+curl https://sentiment-api-461269678728.europe-west1.run.app/health
+curl https://moderation-api-461269678728.europe-west1.run.app/health
+curl https://prediction-api-461269678728.europe-west1.run.app/health
 ```
 
 ---
